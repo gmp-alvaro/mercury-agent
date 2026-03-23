@@ -57,5 +57,3 @@ pnpm dev:telegram
 ```bash
 pnpm typecheck
 ```
-# mercury-agent
-# mercury-agent

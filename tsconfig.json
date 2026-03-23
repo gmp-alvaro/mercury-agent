@@ -12,6 +12,12 @@
     "declaration": true,
     "declarationMap": true,
     "outDir": "dist",
-    "types": ["node"]
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@mercury-agent/types": ["packages/types/src/index.ts"],
+      "@mercury-agent/mercury": ["packages/mercury/src/index.ts"],
+      "@mercury-agent/agent": ["packages/agent/src/index.ts"]
+    }
   }
 }

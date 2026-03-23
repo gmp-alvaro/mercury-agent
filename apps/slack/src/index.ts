@@ -1,38 +1,48 @@
-import { serve } from "@hono/node-server"
-import { App } from "@slack/bolt"
-import { Hono } from "hono"
-import { registerMentionHandler } from "./handlers/mention.js"
-import { createSlackReceiver } from "./receiver.js"
+import { serve } from "@hono/node-server";
+import { App } from "@slack/bolt";
+import { Hono } from "hono";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import { registerMentionHandler } from "./handlers/mention.js";
+import { createSlackReceiver } from "./receiver.js";
 
-const receiver = createSlackReceiver()
+const receiver = createSlackReceiver();
 
 const slackApp = new App({
   token: process.env.SLACK_BOT_TOKEN,
   receiver,
-})
+});
 
-registerMentionHandler(slackApp)
+registerMentionHandler(slackApp);
 
-const app = new Hono()
+const app = new Hono<{
+  Bindings: {
+    incoming: IncomingMessage;
+    outgoing: ServerResponse;
+  };
+}>();
 
-app.get("/health", (c) => c.json({ ok: true }))
+app.get("/health", (c) => c.json({ ok: true }));
 
 app.use("/slack/*", async (c) => {
   // Bridge Hono route handling to Slack's Express receiver.
   await new Promise<void>((resolve, reject) => {
-    receiver.app(c.env.incoming, c.env.outgoing, (err?: unknown) => {
-      if (err) {
-        reject(err)
-        return
-      }
-      resolve()
-    })
-  })
+    receiver.app(
+      c.env.incoming as any,
+      c.env.outgoing as any,
+      (err?: unknown) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
+      },
+    );
+  });
 
-  return c.body(null)
-})
+  return c.body(null);
+});
 
-const port = Number(process.env.PORT ?? 3000)
+const port = Number(process.env.PORT ?? 3000);
 
 serve(
   {
@@ -40,6 +50,6 @@ serve(
     port,
   },
   (info) => {
-    console.log(`Slack app listening on http://localhost:${info.port}`)
+    console.log(`Slack app listening on http://localhost:${info.port}`);
   },
-)
+);

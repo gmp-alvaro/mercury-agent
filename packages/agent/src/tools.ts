@@ -23,4 +23,4 @@ export const tools = [
       required: ["accountId"],
     },
   },
-] as const
+];

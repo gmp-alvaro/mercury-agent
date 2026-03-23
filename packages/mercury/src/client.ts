@@ -1,7 +1,5 @@
 import type {
   CreateTransactionInput,
-  MercuryAccount,
-  MercuryRecipient,
   MercuryTransaction,
 } from "@mercury-agent/types";
 
@@ -50,17 +48,5 @@ export class MercuryClient {
       method: "POST",
       body: JSON.stringify(payload),
     });
-  }
-
-  getAccount(accountId: string): Promise<MercuryAccount> {
-    return this.request<MercuryAccount>(`/account/${accountId}`);
-  }
-
-  getRecipient(recipientId: string): Promise<MercuryRecipient> {
-    return this.request<MercuryRecipient>(`/recipients/${recipientId}`);
-  }
-
-  listRecipients(): Promise<{ recipients: MercuryRecipient[] }> {
-    return this.request<{ recipients: MercuryRecipient[] }>("/recipients");
   }
 }

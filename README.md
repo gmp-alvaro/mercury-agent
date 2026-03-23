@@ -1,12 +1,12 @@
 # mercury-agent
 
-Mercury operations agent for Slack and Telegram, powered by Claude tool use.
+Mercury operations agent for Slack and Telegram, powered by AI tool use.
 
 ## Stack
 
 - Hono HTTP server
 - Node 20+ or Bun runtime
-- Claude API (`@anthropic-ai/sdk`) for intent + tool selection
+- Anthropic Claude, OpenAI, or Gemini for intent + tool selection
 - Slack Bolt SDK
 - Telegraf for Telegram
 - Mercury API via native `fetch`
@@ -21,6 +21,10 @@ Mercury operations agent for Slack and Telegram, powered by Claude tool use.
 - `packages/agent`: Claude orchestration + tool dispatching
 - `packages/mercury`: Mercury API client
 - `packages/types`: shared TypeScript interfaces
+
+## Mercury API reference
+
+- `createTransaction`: [https://docs.mercury.com/reference/createtransaction](https://docs.mercury.com/reference/createtransaction)
 
 ## Setup
 
@@ -37,6 +41,13 @@ cp .env.example .env
 ```
 
 3. Fill in required keys in `.env`.
+
+### AI provider configuration
+
+- `AI_PROVIDER=anthropic|openai|gemini`
+- For Anthropic: set `ANTHROPIC_API_KEY` (and optional `ANTHROPIC_MODEL`)
+- For OpenAI: set `OPENAI_API_KEY` (and optional `OPENAI_MODEL`)
+- For Gemini: set `GEMINI_API_KEY` (and optional `GEMINI_MODEL`)
 
 ## Run
 

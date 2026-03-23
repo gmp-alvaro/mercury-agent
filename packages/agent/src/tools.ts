@@ -12,15 +12,23 @@ export const tools = [
       required: ["amount", "recipientId"],
     },
   },
+];
+
+export const openAITools = tools.map((tool) => ({
+  type: "function" as const,
+  function: {
+    name: tool.name,
+    description: tool.description,
+    parameters: tool.input_schema,
+  },
+}));
+
+export const geminiTools = [
   {
-    name: "getAccountBalance",
-    description: "Get current balance of a Mercury account",
-    input_schema: {
-      type: "object",
-      properties: {
-        accountId: { type: "string", description: "Mercury account ID" },
-      },
-      required: ["accountId"],
-    },
+    functionDeclarations: tools.map((tool) => ({
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.input_schema,
+    })),
   },
 ];

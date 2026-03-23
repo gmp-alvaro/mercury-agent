@@ -36,6 +36,10 @@ export async function runAgent(userMessage: string): Promise<string> {
     return text?.text ?? "No response.";
   }
 
+  if (!isToolAppropriateForMessage(userMessage, toolUse.name)) {
+    return "I don't have access to that operation yet with the current Mercury endpoints. I can currently send money, list recipients, fetch a recipient by ID, and show organization details.";
+  }
+
   return dispatchTool(toolUse.name, toolUse.input as Record<string, unknown>);
 }
 
@@ -234,4 +238,43 @@ function formatOrganizationDetail(
   ];
 
   return lines.join("\n");
+}
+
+function isToolAppropriateForMessage(
+  userMessage: string,
+  toolName: string,
+): boolean {
+  const text = userMessage.toLowerCase();
+
+  const mentionsAny = (phrases: string[]) =>
+    phrases.some((phrase) => text.includes(phrase));
+
+  switch (toolName) {
+    case "createTransaction":
+      return mentionsAny(["send", "pay", "transfer", "payout", "wire", "$"]);
+    case "getRecipients":
+      return (
+        mentionsAny(["recipient", "recipients", "payee", "payees"]) &&
+        mentionsAny(["list", "show", "all", "get"])
+      );
+    case "getRecipient":
+      return mentionsAny([
+        "recipient id",
+        "recipient ",
+        "get recipient",
+        "recipient details",
+      ]);
+    case "getOrganization":
+      return mentionsAny([
+        "organization",
+        "organisation",
+        "org",
+        "company",
+        "business",
+        "ein",
+        "legal name",
+      ]);
+    default:
+      return false;
+  }
 }

@@ -8,6 +8,7 @@ Mercury operations agent for Slack, powered by Anthropic Claude tool use.
 - List all Mercury recipients
 - Get a specific Mercury recipient by recipient ID
 - Get Mercury organization information
+- Get Mercury account balances
 
 ## Example Slack prompts
 
@@ -15,6 +16,7 @@ Mercury operations agent for Slack, powered by Anthropic Claude tool use.
 - `@mercury-agent List out all recipients`
 - `@mercury-agent Get recipient rec_123...`
 - `@mercury-agent Show organization details`
+- `@mercury-agent What's my account balance?`
 
 ## Stack
 
@@ -41,6 +43,7 @@ Mercury operations agent for Slack, powered by Anthropic Claude tool use.
 - `getRecipients`: [https://docs.mercury.com/reference/getrecipients](https://docs.mercury.com/reference/getrecipients)
 - `getRecipient`: [https://docs.mercury.com/reference/getrecipient](https://docs.mercury.com/reference/getrecipient)
 - `getOrganization`: [https://docs.mercury.com/reference/getorganization](https://docs.mercury.com/reference/getorganization)
+- `getAccount`: [https://docs.mercury.com/reference/getaccount](https://docs.mercury.com/reference/getaccount)
 
 `createTransaction` uses `paymentMethod: "ach"` and generates an idempotency key per request.
 

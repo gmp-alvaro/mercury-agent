@@ -21,8 +21,19 @@ const getRecipientSchema = z.object({
   recipientId: z.string().min(1),
 });
 
+const getAccountSchema = z.object({
+  accountId: z.string().min(1).optional(),
+});
+
 function formatLabeledValue(label: string, value: string): string {
   return `**${label}:** ${value}`;
+}
+
+function formatUsd(amount: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
 }
 
 export async function runAgent(userMessage: string): Promise<string> {
@@ -41,7 +52,7 @@ export async function runAgent(userMessage: string): Promise<string> {
   }
 
   if (!isToolAppropriateForMessage(userMessage, toolUse.name)) {
-    return "I don't have access to that operation yet with the current Mercury endpoints. I can currently send money, list recipients, fetch a recipient by ID, and show organization details.";
+    return "I don't have access to that operation yet with the current Mercury endpoints. I can currently send money, list recipients, fetch a recipient by ID, show organization details, and fetch account balances.";
   }
 
   return dispatchTool(
@@ -107,6 +118,21 @@ async function dispatchTool(
     case "getOrganization": {
       const organization = await mercury.getOrganization();
       return formatOrganizationDetail(organization, userMessage);
+    }
+
+    case "getAccount": {
+      const parsed = getAccountSchema.safeParse(input);
+      if (!parsed.success) {
+        return "I need a valid Mercury account ID.";
+      }
+
+      const accountId = parsed.data.accountId?.trim() || MERCURY_ACCOUNT_ID;
+      if (!accountId) {
+        return "Missing MERCURY_ACCOUNT_ID. Set your Mercury account ID in environment variables, or provide an account ID.";
+      }
+
+      const account = await mercury.getAccount(accountId);
+      return formatAccountDetail(account, userMessage);
     }
 
     default:
@@ -340,14 +366,114 @@ function formatOrganizationDetail(
   return lines.join("\n");
 }
 
+function formatAccountDetail(
+  account: {
+    id: string;
+    name?: string;
+    status?: string;
+    type?: string;
+    accountNumber?: string;
+    routingNumber?: string;
+    availableBalance: number;
+    currentBalance?: number;
+  },
+  userMessage: string,
+): string {
+  const requestedField = getRequestedField(userMessage);
+  const availableBalance =
+    typeof account.availableBalance === "number" ? account.availableBalance : null;
+  const currentBalance =
+    typeof account.currentBalance === "number" ? account.currentBalance : null;
+
+  if (requestedField === "available_balance") {
+    return availableBalance !== null
+      ? formatLabeledValue("Available Balance", formatUsd(availableBalance))
+      : "I couldn't find the available balance for this account.";
+  }
+
+  if (requestedField === "current_balance") {
+    return currentBalance !== null
+      ? formatLabeledValue("Current Balance", formatUsd(currentBalance))
+      : "I couldn't find the current balance for this account.";
+  }
+
+  if (requestedField === "balance") {
+    if (availableBalance !== null && currentBalance !== null) {
+      return `${formatLabeledValue("Available Balance", formatUsd(availableBalance))}\n${formatLabeledValue("Current Balance", formatUsd(currentBalance))}`;
+    }
+
+    if (availableBalance !== null) {
+      return formatLabeledValue("Available Balance", formatUsd(availableBalance));
+    }
+
+    if (currentBalance !== null) {
+      return formatLabeledValue("Current Balance", formatUsd(currentBalance));
+    }
+
+    return "I couldn't find a balance for this account.";
+  }
+
+  if (requestedField === "account_id" || requestedField === "id") {
+    return formatLabeledValue("Account ID", account.id);
+  }
+
+  if (requestedField === "account_number") {
+    return account.accountNumber
+      ? formatLabeledValue("Account Number", account.accountNumber)
+      : "I couldn't find an account number for this account.";
+  }
+
+  if (requestedField === "routing_number") {
+    return account.routingNumber
+      ? formatLabeledValue("Routing Number", account.routingNumber)
+      : "I couldn't find a routing number for this account.";
+  }
+
+  if (requestedField === "status") {
+    return account.status
+      ? formatLabeledValue("Status", account.status)
+      : "I couldn't find a status for this account.";
+  }
+
+  if (requestedField === "type") {
+    return account.type
+      ? formatLabeledValue("Type", account.type)
+      : "I couldn't find an account type.";
+  }
+
+  const lines = [
+    "Account details",
+    formatLabeledValue("Name", account.name ?? "Unknown"),
+    formatLabeledValue(
+      "Available Balance",
+      availableBalance !== null ? formatUsd(availableBalance) : "Unknown",
+    ),
+    formatLabeledValue(
+      "Current Balance",
+      currentBalance !== null ? formatUsd(currentBalance) : "Unknown",
+    ),
+    formatLabeledValue("Status", account.status ?? "Unknown"),
+    formatLabeledValue("Type", account.type ?? "Unknown"),
+    formatLabeledValue("Account ID", account.id),
+  ];
+
+  return lines.join("\n");
+}
+
 type RequestedField =
   | "id"
   | "recipient_id"
   | "transaction_id"
+  | "account_id"
+  | "account_number"
+  | "routing_number"
   | "name"
   | "email"
   | "nickname"
   | "amount"
+  | "balance"
+  | "available_balance"
+  | "current_balance"
   | "status"
   | "ein"
   | "legal_name"
@@ -360,10 +486,17 @@ function getRequestedField(userMessage: string): RequestedField {
 
   if (text.includes("transaction id")) return "transaction_id";
   if (text.includes("recipient id")) return "recipient_id";
+  if (text.includes("account id")) return "account_id";
+  if (text.includes("account number")) return "account_number";
+  if (text.includes("routing number")) return "routing_number";
   if (text.includes("organization id") || text.includes("org id"))
     return "organization_id";
   if (text.includes("legal name") || text.includes("company name"))
     return "legal_name";
+  if (text.includes("available balance")) return "available_balance";
+  if (text.includes("current balance")) return "current_balance";
+  if (text.includes("account balance") || text.includes(" balance"))
+    return "balance";
   if (text.includes("nickname")) return "nickname";
   if (text.includes("email")) return "email";
   if (text.includes("name")) return "name";
@@ -410,6 +543,17 @@ function isToolAppropriateForMessage(
         "ein",
         "legal name",
       ]);
+    case "getAccount":
+      return (
+        mentionsAny([
+          "balance",
+          "account balance",
+          "available balance",
+          "current balance",
+        ]) ||
+        (mentionsAny(["account"]) &&
+          mentionsAny(["details", "detail", "info", "information", "status"]))
+      );
     default:
       return false;
   }

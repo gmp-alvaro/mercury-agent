@@ -1,4 +1,5 @@
 import type {
+  MercuryAccount,
   CreateTransactionInput,
   MercuryOrganization,
   MercuryRecipient,
@@ -67,5 +68,9 @@ export class MercuryClient {
 
   getOrganization(): Promise<MercuryOrganization> {
     return this.request<MercuryOrganization>("/organization");
+  }
+
+  getAccount(accountId: string): Promise<MercuryAccount> {
+    return this.request<MercuryAccount>(`/account/${accountId}`);
   }
 }

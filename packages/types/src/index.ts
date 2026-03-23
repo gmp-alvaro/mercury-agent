@@ -17,9 +17,19 @@ export interface CreateTransactionInput {
 
 export interface MercuryAccount {
   id: string;
-  name?: string;
+  accountNumber: string;
   availableBalance: number;
-  currentBalance?: number;
+  canReceiveTransactions?: boolean | null;
+  createdAt: string;
+  currentBalance: number;
+  dashboardLink: string;
+  kind: string;
+  legalBusinessName: string;
+  name: string;
+  nickname?: string | null;
+  routingNumber: string;
+  status: "active" | "deleted" | "pending" | "archived";
+  type: "mercury" | "external" | "recipient";
 }
 
 export interface MercuryRecipient {

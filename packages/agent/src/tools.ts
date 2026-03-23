@@ -48,4 +48,19 @@ export const tools = [
       required: [],
     },
   },
+  {
+    name: "getAccount",
+    description: "Get Mercury account details and balances by account ID",
+    input_schema: {
+      type: "object",
+      properties: {
+        accountId: {
+          type: "string",
+          description:
+            "Mercury account ID. Optional if MERCURY_ACCOUNT_ID is configured.",
+        },
+      },
+      required: [],
+    },
+  },
 ];

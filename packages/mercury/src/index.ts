@@ -10,6 +10,7 @@ export const mercury = {
   getRecipients: () => client.getRecipients(),
   getRecipient: (recipientId: string) => client.getRecipient(recipientId),
   getOrganization: () => client.getOrganization(),
+  getAccount: (accountId: string) => client.getAccount(accountId),
 };
 
 export { MercuryClient } from "./client.js";

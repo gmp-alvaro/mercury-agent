@@ -1,6 +1,11 @@
 import type { App } from "@slack/bolt";
 import { runAgent } from "@mercury-agent/agent";
 
+function toSlackMrkdwn(text: string): string {
+  // Slack uses *bold* syntax, not **bold**.
+  return text.replace(/\*\*(.+?)\*\*/g, "*$1*");
+}
+
 export function registerMentionHandler(slackApp: App) {
   slackApp.event("app_mention", async ({ event, say }) => {
     const input = event.text.replace(/<@[^>]+>/g, "").trim();
@@ -10,6 +15,9 @@ export function registerMentionHandler(slackApp: App) {
     }
 
     const result = await runAgent(input);
-    await say(result);
+    await say({
+      text: toSlackMrkdwn(result),
+      mrkdwn: true,
+    });
   });
 }

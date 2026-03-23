@@ -14,10 +14,21 @@ export function registerMentionHandler(slackApp: App) {
       return;
     }
 
-    const result = await runAgent(input);
-    await say({
-      text: toSlackMrkdwn(result),
-      mrkdwn: true,
-    });
+    try {
+      const result = await runAgent(input);
+      await say({
+        text: toSlackMrkdwn(result),
+        mrkdwn: true,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unexpected error while processing request.";
+      await say({
+        text: `I couldn't complete that request.\n${toSlackMrkdwn(message)}`,
+        mrkdwn: true,
+      });
+    }
   });
 }

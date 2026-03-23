@@ -42,6 +42,8 @@ Mercury operations agent for Slack, powered by Anthropic Claude tool use.
 - `getRecipient`: [https://docs.mercury.com/reference/getrecipient](https://docs.mercury.com/reference/getrecipient)
 - `getOrganization`: [https://docs.mercury.com/reference/getorganization](https://docs.mercury.com/reference/getorganization)
 
+`createTransaction` uses `paymentMethod: "ach"` and generates an idempotency key per request.
+
 ## Setup
 
 1. Install dependencies:

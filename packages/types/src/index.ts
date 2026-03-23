@@ -12,6 +12,7 @@ export interface CreateTransactionInput {
   recipientId: string;
   accountId: string;
   note?: string;
+  paymentMethod?: "ach" | "check" | "domesticWire";
 }
 
 export interface MercuryAccount {

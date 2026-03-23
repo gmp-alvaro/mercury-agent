@@ -4,6 +4,7 @@ import type {
   MercuryRecipient,
   MercuryTransaction,
 } from "@mercury-agent/types";
+import { randomUUID } from "node:crypto";
 
 export interface MercuryClientOptions {
   apiKey?: string;
@@ -46,7 +47,12 @@ export class MercuryClient {
       `/account/${accountId}/transactions`,
       {
         method: "POST",
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          ...body,
+          // Mercury requires these fields for SendMoney API requests.
+          paymentMethod: payload.paymentMethod ?? "ach",
+          idempotencyKey: randomUUID(),
+        }),
       },
     );
   }

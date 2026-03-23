@@ -56,7 +56,7 @@ async function dispatchTool(
       }
 
       const tx = await mercury.createTransaction(resolvedInput);
-      return `✅ Sent $${parsed.data.amount} — Transaction ID: ${tx.id}`;
+      return formatTransactionResult(parsed.data.amount, tx);
     }
 
     case "getRecipients": {
@@ -67,14 +67,9 @@ async function dispatchTool(
         return "I couldn't find any recipients in Mercury.";
       }
 
-      const lines = recipients.slice(0, 20).map((recipient, index) => {
-        const label =
-          recipient.name ??
-          recipient.nickname ??
-          recipient.email ??
-          recipient.id;
-        return `${index + 1}. ${label} (${recipient.id})`;
-      });
+      const lines = recipients
+        .slice(0, 20)
+        .map((recipient, index) => formatRecipientLine(recipient, index + 1));
 
       const suffix =
         recipients.length > 20
@@ -91,18 +86,12 @@ async function dispatchTool(
       }
 
       const recipient = await mercury.getRecipient(parsed.data.recipientId);
-      const label =
-        recipient.name ?? recipient.nickname ?? recipient.email ?? recipient.id;
-      return `Recipient: ${label}\nID: ${recipient.id}`;
+      return formatRecipientDetail(recipient);
     }
 
     case "getOrganization": {
       const organization = await mercury.getOrganization();
-      const name =
-        organization.name ??
-        organization.legalName ??
-        (typeof organization.id === "string" ? organization.id : "unknown");
-      return `Organization: ${name}\n${JSON.stringify(organization, null, 2)}`;
+      return formatOrganizationDetail(organization);
     }
 
     default:
@@ -179,4 +168,70 @@ async function resolveTransactionInput(input: {
     recipientId,
     note: input.note,
   };
+}
+
+function formatTransactionResult(
+  requestedAmount: number,
+  tx: { id: string; status?: string; amount?: number },
+): string {
+  const amount = typeof tx.amount === "number" ? tx.amount : requestedAmount;
+  const status = tx.status ? `\nStatus: ${tx.status}` : "";
+  return `✅ Transaction created\nAmount: $${amount}\nTransaction ID: ${tx.id}${status}`;
+}
+
+function formatRecipientLine(
+  recipient: { id: string; name?: string; nickname?: string; email?: string },
+  index: number,
+): string {
+  const label =
+    recipient.name ??
+    recipient.nickname ??
+    recipient.email ??
+    "Unnamed recipient";
+  const email = recipient.email ? ` - ${recipient.email}` : "";
+  return `${index}. ${label}${email} (${recipient.id})`;
+}
+
+function formatRecipientDetail(recipient: {
+  id: string;
+  name?: string;
+  nickname?: string;
+  email?: string;
+}): string {
+  const label =
+    recipient.name ??
+    recipient.nickname ??
+    recipient.email ??
+    "Unnamed recipient";
+  const nickname = recipient.nickname
+    ? `\nNickname: ${recipient.nickname}`
+    : "";
+  const email = recipient.email ? `\nEmail: ${recipient.email}` : "";
+  return `Recipient: ${label}\nID: ${recipient.id}${nickname}${email}`;
+}
+
+function formatOrganizationDetail(
+  organizationResponse: Record<string, unknown>,
+): string {
+  const org =
+    organizationResponse.organization &&
+    typeof organizationResponse.organization === "object"
+      ? (organizationResponse.organization as Record<string, unknown>)
+      : organizationResponse;
+
+  const legalBusinessName =
+    typeof org.legalBusinessName === "string" ? org.legalBusinessName : null;
+  const kind = typeof org.kind === "string" ? org.kind : null;
+  const ein = typeof org.ein === "string" ? org.ein : null;
+  const id = typeof org.id === "string" ? org.id : null;
+
+  const lines = [
+    "Organization details",
+    `Name: ${legalBusinessName ?? "Unknown"}`,
+    `Type: ${kind ?? "Unknown"}`,
+    `EIN: ${ein ?? "Unknown"}`,
+    `Organization ID: ${id ?? "Unknown"}`,
+  ];
+
+  return lines.join("\n");
 }

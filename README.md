@@ -23,6 +23,9 @@ Mercury operations agent for Slack, powered by AI tool use.
 ## Mercury API reference
 
 - `createTransaction`: [https://docs.mercury.com/reference/createtransaction](https://docs.mercury.com/reference/createtransaction)
+- `getRecipients`: [https://docs.mercury.com/reference/getrecipients](https://docs.mercury.com/reference/getrecipients)
+- `getRecipient`: [https://docs.mercury.com/reference/getrecipient](https://docs.mercury.com/reference/getrecipient)
+- `getOrganization`: [https://docs.mercury.com/reference/getorganization](https://docs.mercury.com/reference/getorganization)
 
 ## Setup
 

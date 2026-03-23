@@ -1,5 +1,7 @@
 import type {
   CreateTransactionInput,
+  MercuryOrganization,
+  MercuryRecipient,
   MercuryTransaction,
 } from "@mercury-agent/types";
 
@@ -47,5 +49,17 @@ export class MercuryClient {
         body: JSON.stringify(body),
       },
     );
+  }
+
+  getRecipients(): Promise<{ recipients: MercuryRecipient[] }> {
+    return this.request<{ recipients: MercuryRecipient[] }>("/recipients");
+  }
+
+  getRecipient(recipientId: string): Promise<MercuryRecipient> {
+    return this.request<MercuryRecipient>(`/recipient/${recipientId}`);
+  }
+
+  getOrganization(): Promise<MercuryOrganization> {
+    return this.request<MercuryOrganization>("/organization");
   }
 }

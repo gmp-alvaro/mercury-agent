@@ -7,6 +7,9 @@ export const mercury = {
   createTransaction: (
     payload: Parameters<typeof client.createTransaction>[0],
   ) => createTransaction(client, payload),
+  getRecipients: () => client.getRecipients(),
+  getRecipient: (recipientId: string) => client.getRecipient(recipientId),
+  getOrganization: () => client.getOrganization(),
 };
 
 export { MercuryClient } from "./client.js";

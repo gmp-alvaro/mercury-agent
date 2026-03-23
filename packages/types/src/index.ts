@@ -27,3 +27,10 @@ export interface MercuryRecipient {
   nickname?: string;
   email?: string;
 }
+
+export interface MercuryOrganization {
+  id?: string;
+  name?: string;
+  legalName?: string;
+  [key: string]: unknown;
+}

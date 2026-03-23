@@ -17,6 +17,10 @@ const createTransactionSchema = z.object({
   note: z.string().optional(),
 });
 
+const getRecipientSchema = z.object({
+  recipientId: z.string().min(1),
+});
+
 export async function runAgent(userMessage: string): Promise<string> {
   const response = await anthropic.messages.create({
     model: process.env.ANTHROPIC_MODEL ?? "claude-opus-4-5",
@@ -53,6 +57,52 @@ async function dispatchTool(
 
       const tx = await mercury.createTransaction(resolvedInput);
       return `✅ Sent $${parsed.data.amount} — Transaction ID: ${tx.id}`;
+    }
+
+    case "getRecipients": {
+      const recipientsResponse = await mercury.getRecipients();
+      const recipients = recipientsResponse.recipients ?? [];
+
+      if (recipients.length === 0) {
+        return "I couldn't find any recipients in Mercury.";
+      }
+
+      const lines = recipients.slice(0, 20).map((recipient, index) => {
+        const label =
+          recipient.name ??
+          recipient.nickname ??
+          recipient.email ??
+          recipient.id;
+        return `${index + 1}. ${label} (${recipient.id})`;
+      });
+
+      const suffix =
+        recipients.length > 20
+          ? `\n...and ${recipients.length - 20} more recipients.`
+          : "";
+
+      return `Recipients (${recipients.length}):\n${lines.join("\n")}${suffix}`;
+    }
+
+    case "getRecipient": {
+      const parsed = getRecipientSchema.safeParse(input);
+      if (!parsed.success) {
+        return "I need a valid recipient ID.";
+      }
+
+      const recipient = await mercury.getRecipient(parsed.data.recipientId);
+      const label =
+        recipient.name ?? recipient.nickname ?? recipient.email ?? recipient.id;
+      return `Recipient: ${label}\nID: ${recipient.id}`;
+    }
+
+    case "getOrganization": {
+      const organization = await mercury.getOrganization();
+      const name =
+        organization.name ??
+        organization.legalName ??
+        (typeof organization.id === "string" ? organization.id : "unknown");
+      return `Organization: ${name}\n${JSON.stringify(organization, null, 2)}`;
     }
 
     default:

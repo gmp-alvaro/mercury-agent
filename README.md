@@ -6,7 +6,7 @@ Mercury operations agent for Slack, powered by AI tool use.
 
 - Hono HTTP server
 - Node 20+ or Bun runtime
-- Anthropic Claude, OpenAI, or Gemini for intent + tool selection
+- Anthropic Claude for intent + tool selection
 - Slack Bolt SDK
 - Mercury API via native `fetch`
 - Zod validation
@@ -43,14 +43,20 @@ cp .env.example .env
 ### Mercury configuration
 
 - Set `MERCURY_API_KEY` in `.env`
+- Set `MERCURY_ACCOUNT_ID` in `.env` (your own Mercury account ID)
 - The API base URL is fixed in code to `https://api.mercury.com/api/v1`
+
+### PostgreSQL recipient resolution
+
+- Set `DATABASE_URL` so the agent can resolve creator names like "Noha" from your DB
+- The agent runs a fixed SQL query against `public.creators` and matches on:
+  - `first_name`, `last_name`, `tiktok_display_name`, `tiktok_username`, `email`, and full name (`first_name + last_name`)
+- The `creators` table should include `mercury_recipient_id` (the agent uses this to execute transactions)
 
 ### AI provider configuration
 
-- `AI_PROVIDER=anthropic|openai|gemini`
-- For Anthropic: set `ANTHROPIC_API_KEY` (and optional `ANTHROPIC_MODEL`)
-- For OpenAI: set `OPENAI_API_KEY` (and optional `OPENAI_MODEL`)
-- For Gemini: set `GEMINI_API_KEY` (and optional `GEMINI_MODEL`)
+- Set `ANTHROPIC_API_KEY`
+- Optional: set `ANTHROPIC_MODEL` (default is `claude-opus-4-5`)
 
 ## Run
 

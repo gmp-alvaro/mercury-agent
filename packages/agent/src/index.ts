@@ -21,6 +21,10 @@ const getRecipientSchema = z.object({
   recipientId: z.string().min(1),
 });
 
+function formatLabeledValue(label: string, value: string): string {
+  return `**${label}:** ${value}`;
+}
+
 export async function runAgent(userMessage: string): Promise<string> {
   const response = await anthropic.messages.create({
     model: process.env.ANTHROPIC_MODEL ?? "claude-opus-4-5",
@@ -190,21 +194,21 @@ function formatTransactionResult(
   const requestedField = getRequestedField(userMessage);
 
   if (requestedField === "transaction_id" || requestedField === "id") {
-    return `Transaction ID: ${tx.id}`;
+    return formatLabeledValue("Transaction ID", tx.id);
   }
 
   if (requestedField === "amount") {
-    return `Amount: $${amount}`;
+    return formatLabeledValue("Amount", `$${amount}`);
   }
 
   if (requestedField === "status") {
     return tx.status
-      ? `Transaction status: ${tx.status}`
+      ? formatLabeledValue("Status", tx.status)
       : "I couldn't find a status for this transaction.";
   }
 
-  const status = tx.status ? `\nStatus: ${tx.status}` : "";
-  return `✅ Transaction created\nAmount: $${amount}\nTransaction ID: ${tx.id}${status}`;
+  const status = tx.status ? `\n${formatLabeledValue("Status", tx.status)}` : "";
+  return `✅ Transaction created\n${formatLabeledValue("Amount", `$${amount}`)}\n${formatLabeledValue("Transaction ID", tx.id)}${status}`;
 }
 
 function formatRecipientLine(
@@ -257,29 +261,31 @@ function formatRecipientDetail(
 
   if (requestedField === "email") {
     return recipient.email
-      ? `Recipient email: ${recipient.email}`
+      ? formatLabeledValue("Recipient email", recipient.email)
       : "I couldn't find an email for this recipient.";
   }
 
   if (requestedField === "name") {
-    return `Recipient name: ${label}`;
+    return formatLabeledValue("Recipient name", label);
   }
 
   if (requestedField === "nickname") {
     return recipient.nickname
-      ? `Recipient nickname: ${recipient.nickname}`
+      ? formatLabeledValue("Recipient nickname", recipient.nickname)
       : "I couldn't find a nickname for this recipient.";
   }
 
   if (requestedField === "recipient_id" || requestedField === "id") {
-    return `Recipient ID: ${recipient.id}`;
+    return formatLabeledValue("Recipient ID", recipient.id);
   }
 
   const nickname = recipient.nickname
-    ? `\nNickname: ${recipient.nickname}`
+    ? `\n${formatLabeledValue("Nickname", recipient.nickname)}`
     : "";
-  const email = recipient.email ? `\nEmail: ${recipient.email}` : "";
-  return `Recipient: ${label}\nID: ${recipient.id}${nickname}${email}`;
+  const email = recipient.email
+    ? `\n${formatLabeledValue("Email", recipient.email)}`
+    : "";
+  return `${formatLabeledValue("Recipient", label)}\n${formatLabeledValue("ID", recipient.id)}${nickname}${email}`;
 }
 
 function formatOrganizationDetail(
@@ -301,7 +307,7 @@ function formatOrganizationDetail(
 
   if (message.includes("ein")) {
     return ein
-      ? `Your organization's EIN is ${ein}.`
+      ? formatLabeledValue("EIN", ein)
       : "I couldn't find an EIN for this organization.";
   }
 
@@ -313,7 +319,7 @@ function formatOrganizationDetail(
 
   if (message.includes("organization id") || message.includes("org id")) {
     return id
-      ? `Your organization ID is ${id}.`
+      ? formatLabeledValue("Organization ID", id)
       : "I couldn't find an organization ID.";
   }
 
@@ -325,10 +331,10 @@ function formatOrganizationDetail(
 
   const lines = [
     "Organization details",
-    `Name: ${legalBusinessName ?? "Unknown"}`,
-    `Type: ${kind ?? "Unknown"}`,
-    `EIN: ${ein ?? "Unknown"}`,
-    `Organization ID: ${id ?? "Unknown"}`,
+    formatLabeledValue("Name", legalBusinessName ?? "Unknown"),
+    formatLabeledValue("Type", kind ?? "Unknown"),
+    formatLabeledValue("EIN", ein ?? "Unknown"),
+    formatLabeledValue("Organization ID", id ?? "Unknown"),
   ];
 
   return lines.join("\n");

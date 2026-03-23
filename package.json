@@ -5,7 +5,6 @@
   "packageManager": "pnpm@10.18.0",
   "scripts": {
     "dev:slack": "pnpm --filter @mercury-agent/slack dev",
-    "dev:telegram": "pnpm --filter @mercury-agent/telegram dev",
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm -r build"
   },

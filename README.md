@@ -1,6 +1,6 @@
 # mercury-agent
 
-Mercury operations agent for Slack and Telegram, powered by AI tool use.
+Mercury operations agent for Slack, powered by AI tool use.
 
 ## Stack
 
@@ -8,7 +8,6 @@ Mercury operations agent for Slack and Telegram, powered by AI tool use.
 - Node 20+ or Bun runtime
 - Anthropic Claude, OpenAI, or Gemini for intent + tool selection
 - Slack Bolt SDK
-- Telegraf for Telegram
 - Mercury API via native `fetch`
 - Zod validation
 - pnpm workspaces monorepo
@@ -17,7 +16,6 @@ Mercury operations agent for Slack and Telegram, powered by AI tool use.
 ## Workspace layout
 
 - `apps/slack`: Slack webhook + mention handler
-- `apps/telegram`: Telegram webhook + message handler
 - `packages/agent`: Claude orchestration + tool dispatching
 - `packages/mercury`: Mercury API client
 - `packages/types`: shared TypeScript interfaces
@@ -55,12 +53,6 @@ cp .env.example .env
 
 ```bash
 pnpm dev:slack
-```
-
-- Telegram app:
-
-```bash
-pnpm dev:telegram
 ```
 
 ## Typecheck

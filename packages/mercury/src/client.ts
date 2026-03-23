@@ -5,19 +5,14 @@ import type {
 
 export interface MercuryClientOptions {
   apiKey?: string;
-  baseUrl?: string;
 }
 
 export class MercuryClient {
+  private static readonly BASE_URL = "https://api.mercury.com/api/v1";
   private readonly apiKey: string;
-  private readonly baseUrl: string;
 
   constructor(options: MercuryClientOptions = {}) {
     this.apiKey = options.apiKey ?? process.env.MERCURY_API_KEY ?? "";
-    this.baseUrl =
-      options.baseUrl ??
-      process.env.MERCURY_API_BASE_URL ??
-      "https://backend.mercury.com/api/v1";
   }
 
   private async request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -25,7 +20,7 @@ export class MercuryClient {
       throw new Error("Missing MERCURY_API_KEY");
     }
 
-    const res = await fetch(`${this.baseUrl}${path}`, {
+    const res = await fetch(`${MercuryClient.BASE_URL}${path}`, {
       ...init,
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
@@ -44,9 +39,13 @@ export class MercuryClient {
   createTransaction(
     payload: CreateTransactionInput,
   ): Promise<MercuryTransaction> {
-    return this.request<MercuryTransaction>("/transactions", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
+    const { accountId, ...body } = payload;
+    return this.request<MercuryTransaction>(
+      `/account/${accountId}/transactions`,
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      },
+    );
   }
 }

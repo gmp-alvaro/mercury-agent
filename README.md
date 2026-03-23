@@ -40,6 +40,11 @@ cp .env.example .env
 
 3. Fill in required keys in `.env`.
 
+### Mercury configuration
+
+- Set `MERCURY_API_KEY` in `.env`
+- The API base URL is fixed in code to `https://api.mercury.com/api/v1`
+
 ### AI provider configuration
 
 - `AI_PROVIDER=anthropic|openai|gemini`

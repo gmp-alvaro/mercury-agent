@@ -10,8 +10,8 @@ export interface MercuryTransaction {
 export interface CreateTransactionInput {
   amount: number;
   recipientId: string;
+  accountId: string;
   note?: string;
-  accountId?: string;
 }
 
 export interface MercuryAccount {

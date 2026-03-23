@@ -6,10 +6,11 @@ export const tools = [
       type: "object",
       properties: {
         amount: { type: "number", description: "Amount in USD" },
+        accountId: { type: "string", description: "Mercury account ID" },
         recipientId: { type: "string", description: "Mercury recipient ID" },
         note: { type: "string", description: "Optional memo" },
       },
-      required: ["amount", "recipientId"],
+      required: ["amount", "accountId", "recipientId"],
     },
   },
 ];

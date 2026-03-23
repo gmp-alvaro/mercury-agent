@@ -22,6 +22,7 @@ type AIProvider = "anthropic" | "openai" | "gemini";
 
 const createTransactionSchema = z.object({
   amount: z.number().positive(),
+  accountId: z.string().min(1),
   recipientId: z.string().min(1),
   note: z.string().optional(),
 });
@@ -141,7 +142,7 @@ async function dispatchTool(
     case "createTransaction": {
       const parsed = createTransactionSchema.safeParse(input);
       if (!parsed.success) {
-        return "I need a valid amount and recipient to send money.";
+        return "I need a valid amount, account ID, and recipient to send money.";
       }
 
       const tx = await mercury.createTransaction(parsed.data);

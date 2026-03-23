@@ -1,4 +1,6 @@
-import { ExpressReceiver } from "@slack/bolt";
+import SlackBolt from "@slack/bolt";
+
+const { ExpressReceiver } = SlackBolt;
 
 export function createSlackReceiver() {
   const signingSecret = process.env.SLACK_SIGNING_SECRET;

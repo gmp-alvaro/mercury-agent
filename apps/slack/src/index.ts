@@ -1,10 +1,11 @@
 import { serve } from "@hono/node-server";
-import { App } from "@slack/bolt";
+import SlackBolt from "@slack/bolt";
 import { Hono } from "hono";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { registerMentionHandler } from "./handlers/mention.js";
 import { createSlackReceiver } from "./receiver.js";
 
+const { App } = SlackBolt;
 const receiver = createSlackReceiver();
 
 const slackApp = new App({

@@ -1,14 +1,29 @@
 # mercury-agent
 
-Mercury operations agent for Slack, powered by AI tool use.
+Mercury operations agent for Slack, powered by Anthropic Claude tool use.
+
+## Current capabilities
+
+- Send money through Mercury by resolving a creator from PostgreSQL and using that creator's `mercury_recipient_id`
+- List all Mercury recipients
+- Get a specific Mercury recipient by recipient ID
+- Get Mercury organization information
+
+## Example Slack prompts
+
+- `@mercury-agent Send $140 to Noha`
+- `@mercury-agent List out all recipients`
+- `@mercury-agent Get recipient rec_123...`
+- `@mercury-agent Show organization details`
 
 ## Stack
 
 - Hono HTTP server
 - Node 20+ or Bun runtime
-- Anthropic Claude for intent + tool selection
+- Anthropic Claude (`@anthropic-ai/sdk`) for intent + tool selection
 - Slack Bolt SDK
 - Mercury API via native `fetch`
+- PostgreSQL via `pg`
 - Zod validation
 - pnpm workspaces monorepo
 - TypeScript
@@ -41,29 +56,24 @@ pnpm install
 cp .env.example .env
 ```
 
-3. Fill in required keys in `.env`.
+3. Fill in required keys in `.env`:
 
-### Mercury configuration
+- `MERCURY_API_KEY`
+- `MERCURY_ACCOUNT_ID`
+- `DATABASE_URL`
+- `ANTHROPIC_API_KEY`
+- Optional: `ANTHROPIC_MODEL` (default: `claude-opus-4-5`)
+- `SLACK_BOT_TOKEN`
+- `SLACK_SIGNING_SECRET`
 
-- Set `MERCURY_API_KEY` in `.env`
-- Set `MERCURY_ACCOUNT_ID` in `.env` (your own Mercury account ID)
-- The API base URL is fixed in code to `https://api.mercury.com/api/v1`
+## PostgreSQL requirements
 
-### PostgreSQL recipient resolution
-
-- Set `DATABASE_URL` so the agent can resolve creator names like "Noha" from your DB
-- The agent runs a fixed SQL query against `public.creators` and matches on:
+- The agent queries `public.creators`
+- It matches creator identifiers against:
   - `first_name`, `last_name`, `tiktok_display_name`, `tiktok_username`, `email`, and full name (`first_name + last_name`)
-- The `creators` table should include `mercury_recipient_id` (the agent uses this to execute transactions)
-
-### AI provider configuration
-
-- Set `ANTHROPIC_API_KEY`
-- Optional: set `ANTHROPIC_MODEL` (default is `claude-opus-4-5`)
+- The table must include `mercury_recipient_id`
 
 ## Run
-
-- Slack app:
 
 ```bash
 pnpm dev:slack

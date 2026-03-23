@@ -1,0 +1,17 @@
+{
+  "name": "mercury-agent",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.18.0",
+  "scripts": {
+    "dev:slack": "pnpm --filter @mercury-agent/slack dev",
+    "dev:telegram": "pnpm --filter @mercury-agent/telegram dev",
+    "typecheck": "pnpm -r typecheck",
+    "build": "pnpm -r build"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.1",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.3"
+  }
+}
